@@ -62,6 +62,9 @@ namespace {
             }
             out.push_back(sum % 10);
         }
+        if(carry) {
+            out.push_back(carry);
+        }
         return out;
     }
 
@@ -69,6 +72,7 @@ namespace {
         for (const auto v: l) {
             fmt::print("{}\n", v);
         }
+        fmt::print("\n");
     }
 
 }
@@ -81,11 +85,16 @@ int main() {
         print(out);
     }
 
-    fmt::print("\n");
-
     {
         // 1234, 8086 --> 9320
         std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 8};
+        const auto out = compute(l1, l2);
+        print(out);
+    }
+
+    {
+        // 1234, 9086 --> 10320
+        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 9};
         const auto out = compute(l1, l2);
         print(out);
     }
