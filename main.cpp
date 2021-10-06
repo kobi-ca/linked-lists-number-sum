@@ -48,14 +48,10 @@ namespace {
 
     };
 
-}
-
-int main() {
-    {
-        // 1234, 2001 --> 3235
-        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{1, 0, 0, 2};
+    [[nodiscard]]
+    std::list<unsigned int> compute(const std::forward_list<unsigned int>& l1,
+                                    const std::forward_list<unsigned int>& l2) {
         std::list<unsigned int> out;
-
         auto carry = 0ULL;
         for (const auto[digit1, digit2]: zip(l1, l2)) {
             const auto sum = digit1 + digit2 + carry;
@@ -66,31 +62,32 @@ int main() {
             }
             out.push_back(sum % 10);
         }
+        return out;
+    }
 
-        for (const auto v: out) {
+    void print(const std::list<unsigned int>& l) {
+        for (const auto v: l) {
             fmt::print("{}\n", v);
         }
     }
 
-    fmt::print("\n");
+}
 
-    // 1234, 8086 --> 9320
-    std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 8};
-    std::list<unsigned int> out;
-
-    auto carry = 0ULL;
-    for (const auto[digit1, digit2]: zip(l1, l2)) {
-        const auto sum = digit1 + digit2 + carry;
-        if (sum > 9) {
-            carry = 1;
-        } else {
-            carry = 0;
-        }
-        out.push_back(sum % 10);
+int main() {
+    {
+        // 1234, 2001 --> 3235
+        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{1, 0, 0, 2};
+        const auto out = compute(l1, l2);
+        print(out);
     }
 
-    for (const auto v: out) {
-        fmt::print("{}\n", v);
+    fmt::print("\n");
+
+    {
+        // 1234, 8086 --> 9320
+        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 8};
+        const auto out = compute(l1, l2);
+        print(out);
     }
 
     return 0;
