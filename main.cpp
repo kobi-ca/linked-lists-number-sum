@@ -1,4 +1,5 @@
 #include <list>
+#include <numeric>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h" // for ContainerEq
@@ -158,3 +159,13 @@ TEST(linked_list_number_sum, uneven_length_4) {
     EXPECT_THAT(expected, ::testing::ContainerEq(out));
 }
 
+TEST(linked_list_number_sum, accumulate) {
+    std::list<unsigned int> l1{9, 0, 9, 2, 3, 4, 6};
+    const auto result = std::accumulate(std::begin(l1), std::end(l1), 0ULL,
+                                        [mul = 1](auto sum, const auto val) mutable {
+        sum += val * mul;
+        mul *= 10;
+        return sum;
+    });
+    ASSERT_EQ(6432909, result);
+}
