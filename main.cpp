@@ -1,5 +1,8 @@
-#include <forward_list>
 #include <list>
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h" // for ContainerEq
+
 #include "fmt/format.h"
 
 // TODO:
@@ -11,21 +14,21 @@ namespace {
     struct zip final {
 
         struct zip_iterator_end final {
-            std::forward_list<unsigned int>::const_iterator l1_iter_;
-            std::forward_list<unsigned int>::const_iterator l2_iter_;
-            zip_iterator_end(const std::forward_list<unsigned int>::const_iterator l1,
-                             const std::forward_list<unsigned int>::const_iterator l2) :
+            std::list<unsigned int>::const_iterator l1_iter_;
+            std::list<unsigned int>::const_iterator l2_iter_;
+            zip_iterator_end(const std::list<unsigned int>::const_iterator l1,
+                             const std::list<unsigned int>::const_iterator l2) :
                     l1_iter_{l1}, l2_iter_{l2} {}
         };
 
         struct zip_iterator_begin final {
-            std::forward_list<unsigned int>::const_iterator l1_iter_;
-            std::forward_list<unsigned int>::const_iterator l2_iter_;
-            const std::forward_list<unsigned int> &l1_;
-            const std::forward_list<unsigned int> &l2_;
+            std::list<unsigned int>::const_iterator l1_iter_;
+            std::list<unsigned int>::const_iterator l2_iter_;
+            const std::list<unsigned int> &l1_;
+            const std::list<unsigned int> &l2_;
 
-            zip_iterator_begin(const std::forward_list<unsigned int> &l1,
-                               const std::forward_list<unsigned int> &l2) :
+            zip_iterator_begin(const std::list<unsigned int> &l1,
+                               const std::list<unsigned int> &l2) :
                     l1_iter_(l1.cbegin()), l2_iter_(l2.cbegin()),
                     l1_{l1}, l2_{l2} {}
 
@@ -56,10 +59,10 @@ namespace {
             }
         };
 
-        const std::forward_list<unsigned int>& l1_;
-        const std::forward_list<unsigned int>& l2_;
-        zip(const std::forward_list<unsigned int>& l1,
-            const std::forward_list<unsigned int>& l2) : l1_{l1}, l2_{l2} {}
+        const std::list<unsigned int>& l1_;
+        const std::list<unsigned int>& l2_;
+        zip(const std::list<unsigned int>& l1,
+            const std::list<unsigned int>& l2) : l1_{l1}, l2_{l2} {}
 
         [[nodiscard]]
         auto begin() const noexcept {
@@ -73,8 +76,8 @@ namespace {
     };
 
     [[nodiscard]]
-    std::list<unsigned int> compute(const std::forward_list<unsigned int>& l1,
-                                    const std::forward_list<unsigned int>& l2) {
+    std::list<unsigned int> compute(const std::list<unsigned int>& l1,
+                                    const std::list<unsigned int>& l2) {
         std::list<unsigned int> out;
         auto carry = 0ULL;
         for (const auto[digit1, digit2] : zip(l1, l2)) {
@@ -101,49 +104,57 @@ namespace {
 
 }
 
-int main() {
-    {
-        // 1234, 2001 --> 3235
-        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{1, 0, 0, 2};
-        const auto out = compute(l1, l2);
-        print(out);
-    }
-
-    {
-        // 1234, 8086 --> 9320
-        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 8};
-        const auto out = compute(l1, l2);
-        print(out);
-    }
-
-    {
-        // 1234, 9086 --> 10320
-        std::forward_list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 9};
-        const auto out = compute(l1, l2);
-        print(out);
-    }
-
-    {
-        // 99, 1 --> 100
-        std::forward_list<unsigned int> l1{9, 9}, l2{1};
-        const auto out = compute(l1, l2);
-        print(out);
-    }
-
-    {
-        // 909, 1 --> 910
-        std::forward_list<unsigned int> l1{9, 0, 9}, l2{1};
-        const auto out = compute(l1, l2);
-        print(out);
-    }
-
-    {
-        // 1009, 1 --> 1010
-        std::forward_list<unsigned int> l1{9, 0, 0, 1}, l2{1};
-        const auto out = compute(l1, l2);
-        print(out);
-    }
-
-
-    return 0;
+TEST(linked_list_number_sum, simple) {
+    // 1234, 2001 --> 3235
+    std::list<unsigned int> l1{4, 3, 2, 1}, l2{1, 0, 0, 2};
+    const auto out = compute(l1, l2);
+    print(out);
+    const auto expected = std::list<unsigned int>{5, 3, 2, 3};
+    EXPECT_THAT(expected, ::testing::ContainerEq(out));
 }
+
+TEST(linked_list_number_sum, test_carry) {
+    // 1234, 8086 --> 9320
+    std::list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 8};
+    const auto out = compute(l1, l2);
+    print(out);
+    const auto expected = std::list<unsigned int>{0, 2, 3, 9};
+    EXPECT_THAT(expected, ::testing::ContainerEq(out));
+}
+
+TEST(linked_list_number_sum, output_is_longer) {
+    // 1234, 9086 --> 10320
+    std::list<unsigned int> l1{4, 3, 2, 1}, l2{6, 8, 0, 9};
+    const auto out = compute(l1, l2);
+    print(out);
+    const auto expected = std::list<unsigned int>{0, 2, 3, 0, 1};
+    EXPECT_THAT(expected, ::testing::ContainerEq(out));
+}
+
+TEST(linked_list_number_sum, uneven_length) {
+    // 99, 1 --> 100
+    std::list<unsigned int> l1{9, 9}, l2{1};
+    const auto out = compute(l1, l2);
+    print(out);
+    const auto expected = std::list<unsigned int>{0, 0, 1};
+    EXPECT_THAT(expected, ::testing::ContainerEq(out));
+}
+
+TEST(linked_list_number_sum, uneven_length_3) {
+        // 909, 1 --> 910
+    std::list<unsigned int> l1{9, 0, 9}, l2{1};
+    const auto out = compute(l1, l2);
+    print(out);
+    const auto expected = std::list<unsigned int>{0, 1, 9};
+    EXPECT_THAT(expected, ::testing::ContainerEq(out));
+}
+
+TEST(linked_list_number_sum, uneven_length_4) {
+    // 1009, 1 --> 1010
+    std::list<unsigned int> l1{9, 0, 0, 1}, l2{1};
+    const auto out = compute(l1, l2);
+    print(out);
+    const auto expected = std::list<unsigned int>{0, 1, 0, 1};
+    EXPECT_THAT(expected, ::testing::ContainerEq(out));
+}
+
