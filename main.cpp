@@ -130,5 +130,20 @@ int main() {
         print(out);
     }
 
+    {
+        // 909, 1 --> 910
+        std::forward_list<unsigned int> l1{9, 0, 9}, l2{1};
+        const auto out = compute(l1, l2);
+        print(out);
+    }
+
+    {
+        // 1009, 1 --> 1010
+        std::forward_list<unsigned int> l1{9, 0, 0, 1}, l2{1};
+        const auto out = compute(l1, l2);
+        print(out);
+    }
+
+
     return 0;
 }
